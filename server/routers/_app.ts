@@ -2,6 +2,7 @@ import { publicProcedure, router } from "../trpc";
 import { prisma } from '../../lib/db'
 import { currencyFormat } from "../../utils/currencyFormat";
 import { groupBy } from "../../utils/groupBy";
+import { z } from "zod";
 
 export const appRouter = router({
   listMonths: publicProcedure
@@ -29,6 +30,13 @@ export const appRouter = router({
           total: `Total: ${currencyFormat(monthTotal)} ${formattedPayerTotal}`
         }
       })
+    }),
+  createMonth: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async (req) => {
+      const month = await prisma.month.create({ data: { name: req.input.name } })
+
+      return month
     })
 })
 
