@@ -1,6 +1,7 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { trpc } from '../utils/trpc'
 
 const queryClient = new QueryClient()
 
@@ -12,4 +13,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   )
 }
 
-export default MyApp
+export default trpc.withTRPC(MyApp)

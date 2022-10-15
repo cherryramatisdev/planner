@@ -13,22 +13,15 @@ datasource db {
 model Month {
   id     Int     @id @default(autoincrement())
   name   String
-  payers Payer[]
-}
-
-model Payer {
-  id      Int     @id @default(autoincrement())
-  name    String
-  month   Month   @relation(fields: [monthId], references: [id])
-  monthId Int
-  debits  Debit[]
+  debits Debit[]
 }
 
 model Debit {
-  id      Int     @id @default(autoincrement())
-  title   String
-  price   Int
-  paid    Boolean @default(false)
-  payer   Payer   @relation(fields: [payerId], references: [id])
-  payerId Int
+  id        Int     @id @default(autoincrement())
+  title     String
+  price     Float
+  paid      Boolean @default(false)
+  payerName String
+  month     Month   @relation(fields: [monthId], references: [id])
+  monthId   Int
 }

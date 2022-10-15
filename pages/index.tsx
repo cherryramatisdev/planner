@@ -1,9 +1,17 @@
 import type { NextPage } from 'next'
+import { Month } from '../components/month'
+import { trpc } from '../utils/trpc'
 
 const Home: NextPage = () => {
+  const months = trpc.listMonths.useQuery()
+
+  if (!months.data) return <div>Loading...</div>
+
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
-      <label className="text-red-500">teste</label>
+    <div className="p-10 w-screen h-screen flex flex-col items-start justify-start gap-5">
+      {months.data.map(data => (
+        <Month title={data.name} totals={data.total} />
+      ))}
     </div>
   )
 }
