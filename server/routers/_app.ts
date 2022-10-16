@@ -16,8 +16,10 @@ export const appRouter = router({
           return { ...month, total: `Total: 0` }
         }
 
-        monthTotal = monthTotal + month.debits.reduce((prev, cur) => prev + cur.price, 0)
-        const groupedBy = groupBy(month.debits, 'payerName')
+        const debitsNotPaid = month.debits.filter(debit => !debit.paid)
+
+        monthTotal = monthTotal + debitsNotPaid.reduce((prev, cur) => prev + cur.price, 0)
+        const groupedBy = groupBy(debitsNotPaid, 'payerName')
 
         const t = Object.keys(groupedBy).map(t => {
           return { name: t, total: groupedBy[t].reduce((prev: any, cur: { price: any; }) => prev + cur.price, 0) }
@@ -37,7 +39,39 @@ export const appRouter = router({
       const month = await prisma.month.create({ data: { name: req.input.name } })
 
       return month
-    })
+    }),
+  getMonthDebits: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async (req) => {
+      const month = await prisma.month.findFirstOrThrow({ where: { id: req.input.id }, include: { debits: true } })
+
+      return month
+    }),
+  updateDebitPaid: publicProcedure
+    .input(z.object({ id: z.number(), paid: z.boolean() }))
+    .mutation(async req => {
+      const debit = await prisma.debit.update({
+        where: { id: req.input.id },
+        data: { paid: !req.input.paid },
+      })
+
+      return debit
+    }),
+  createDebit: publicProcedure
+    .input(z.object({ title: z.string(), price: z.number(), payerName: z.string(), monthId: z.number() }))
+    .mutation(async (req) => {
+      const debit = await prisma.debit.create({
+        data: {
+          payerName: req.input.payerName,
+          title: req.input.title,
+          price: req.input.price,
+          paid: false,
+          monthId: req.input.monthId
+        }
+      })
+
+      return debit
+    }),
 })
 
 export type AppRouter = typeof appRouter

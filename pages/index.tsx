@@ -30,7 +30,7 @@ const Home: NextPage = () => {
   return (
     <div className="relative p-10 w-screen h-screen flex flex-col items-start justify-start gap-5">
       {months.data.map(data => (
-        <Month title={data.name} totals={data.total} />
+        <Month title={data.name} totals={data.total} href={`/debit/${data.id}`} />
       ))}
 
       <Modal open={open} onClose={() => setOpen(false)}>
