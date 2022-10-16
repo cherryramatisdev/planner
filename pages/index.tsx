@@ -5,6 +5,7 @@ import { Month } from '../components/month'
 import { GrAdd } from 'react-icons/gr'
 
 import { trpc } from '../utils/trpc'
+import { NavBar } from '../components/navbar'
 
 const Home: NextPage = () => {
   const [name, setName] = useState('')
@@ -29,6 +30,8 @@ const Home: NextPage = () => {
 
   return (
     <div className="relative p-10 w-screen h-screen flex flex-col items-start justify-start gap-5">
+      <NavBar title="Pagina inicial - Selecione ou crie um mes"/>
+
       {months.data.map(data => (
         <Month key={data.id} title={data.name} totals={data.total} href={`/debit/${data.id}`} />
       ))}

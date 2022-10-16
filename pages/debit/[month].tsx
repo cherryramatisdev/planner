@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react"
 import CurrencyInput from "react-currency-input-field"
 import { GrAdd } from "react-icons/gr"
 import { Modal } from "../../components/modal"
+import { NavBar } from "../../components/navbar"
 import { currencyFormat } from "../../utils/currencyFormat"
 import { groupBy } from "../../utils/groupBy"
 import { trpc } from "../../utils/trpc"
@@ -63,8 +64,10 @@ export default function DebitPage() {
 
   return (
     <div className="p-10 container flex gap-10 items-center justify-around">
+      <NavBar title={`Lista de debitos para o mes - ${month.data.name}`} />
+
       {Object.keys(groupedByPayer).map((payer) => (
-        <div key={payer}>
+        <div key={payer} className="mt-10">
           <p className="text-white">{payer}</p>
 
           {groupedByPayer[payer].map((debit: Debit) => (
