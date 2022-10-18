@@ -29,7 +29,7 @@ const Home: NextPage = () => {
   if (!months.data) return <div>Loading...</div>
 
   return (
-    <div className="relative p-10 w-screen h-screen flex flex-col items-start justify-start gap-5">
+    <div className="relative p-10 w-screen h-screen flex flex-col items-center justify-start gap-5">
       <NavBar title="Pagina inicial - Selecione ou crie um mes"/>
 
       {months.data.map(data => (

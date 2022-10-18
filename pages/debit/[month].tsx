@@ -61,77 +61,96 @@ export default function DebitPage() {
   if (!month.data) return <>Loading...</>
 
   const groupedByPayer = groupBy(month.data.debits, 'payerName')
+  const payersName = Object.keys(groupedByPayer).filter(String)
 
   return (
-    <div className="p-10 container flex gap-10 items-center justify-around">
+    <>
       <NavBar title={`Lista de debitos para o mes - ${month.data.name}`} />
 
-      {Object.keys(groupedByPayer).map((payer) => (
-        <div key={payer} className="mt-10">
-          <p className="text-white">{payer}</p>
+      <div className="p-10 container grid grid-cols-4 gap-10 overflow-y-auto">
+        {payersName.map((payer) => (
+          <div key={payer} className="mt-10">
+            <p className="text-white">Debitos a serem pagos por {payer}: </p>
 
-          {groupedByPayer[payer].map((debit: Debit) => (
-            <button key={debit.id} onClick={() => togglePaid(debit.id, debit.paid)} className={`flex items-center justify-between bg-white text-black px-10 mb-2 ${debit.paid && 'opacity-30'}`}>
-              <p>{debit.title} - {currencyFormat(debit.price)}</p>
-              <p className={`${debit.paid ? 'text-red-500' : 'text-white'} ml-5 font-bold`}>PG</p>
-            </button>
-          ))}
-        </div>
-      ))}
+            {groupedByPayer[payer].map((debit: Debit) => (
+              <button key={debit.id} onClick={() => togglePaid(debit.id, debit.paid)} className={`w-full flex items-center justify-between bg-white text-black p-2 mb-2 ${debit.paid && 'opacity-30'}`}>
+                <p>{debit.title} - {currencyFormat(debit.price)}</p>
+                <p className={`${debit.paid ? 'text-red-500' : 'text-white'} ml-2 font-bold`}>PG</p>
+              </button>
+            ))}
+          </div>
+        ))}
 
-      <button
-        onClick={() => setOpen(current => !current)}
-        className="w-12 h-12 bg-white rounded-full absolute bottom-10 right-10 flex items-center justify-center"
-      >
-        <GrAdd />
-      </button>
+        <button
+          onClick={() => setOpen(current => !current)}
+          className="w-12 h-12 bg-white rounded-full absolute bottom-10 right-10 flex items-center justify-center"
+        >
+          <GrAdd />
+        </button>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <form className="w-full flex flex-col items-center justify-center text-black" onSubmit={onSubmit}>
-          <p>Deseja adicionar um debito novo?</p>
-          <fieldset>
-            <input
-              className="mt-2 px-2 rounded-md bg-white border border-black"
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={e => setFormData(current => ({ ...current, title: e.target.value }))}
-              placeholder="Proposito do debito"
-            />
-          </fieldset>
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <form className="w-full flex flex-col items-center justify-center text-black" onSubmit={onSubmit}>
+            <p>Deseja adicionar um debito novo?</p>
+            <fieldset className="w-full">
+              <input
+                className="w-full mt-2 px-2 rounded-md bg-white border border-black"
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={e => setFormData(current => ({ ...current, title: e.target.value }))}
+                placeholder="Proposito do debito"
+              />
+            </fieldset>
 
-          <fieldset>
-            <CurrencyInput
-              className="mt-2 px-2 rounded-md bg-white border border-black"
-              id="price"
-              name="price"
-              placeholder="Preço"
-              intlConfig={{ locale: 'pt-BR', currency: 'BRL' }}
-              defaultValue={0}
-              decimalsLimit={2}
-              value={formData.price}
-              onValueChange={(value, _name) => {
-                setFormData(current => ({ ...current, price: value ?? '' }))
-              }}
-            />
-          </fieldset>
+            <fieldset className="w-full">
+              <CurrencyInput
+                className="w-full mt-2 px-2 rounded-md bg-white border border-black"
+                id="price"
+                name="price"
+                placeholder="Preço"
+                intlConfig={{ locale: 'pt-BR', currency: 'BRL' }}
+                defaultValue={0}
+                decimalsLimit={2}
+                value={formData.price}
+                onValueChange={(value, _name) => {
+                  setFormData(current => ({ ...current, price: value ?? '' }))
+                }}
+              />
+            </fieldset>
 
-          <fieldset>
-            <input
-              className="mt-2 px-2 rounded-md bg-white border border-black"
-              type="text"
-              id="payerName"
-              name="payerName"
-              value={formData.payerName}
-              onChange={e => setFormData(current => ({ ...current, payerName: e.target.value }))}
-              placeholder="Nome do pagador"
-            />
-          </fieldset>
+            <fieldset className="w-full">
+              {payersName.length > 0 ? (
+                <select
+                  className="w-full mt-2 px-2 rounded-md bg-white border border-black"
+                  value={formData.payerName}
+                  onChange={e => setFormData(current => ({ ...current, payerName: e.target.value }))}
+                >
+                  <option value="" disabled>Nome do pagador</option>
 
-          <button className="w-40 p-2 mt-10 rounded-lg bg-black text-white">Criar</button>
-        </form>
-      </Modal>
-    </div>
+                  {payersName.map(payer => (
+                    <>
+                      <option value={payer}>{payer}</option>
+                    </>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className="w-full mt-2 px-2 rounded-md bg-white border border-black"
+                  type="text"
+                  id="payerName"
+                  name="payerName"
+                  value={formData.payerName}
+                  onChange={e => setFormData(current => ({ ...current, payerName: e.target.value }))}
+                  placeholder="Nome do pagador"
+                />
+              )}
+            </fieldset>
+
+            <button className="w-full p-2 mt-10 rounded-lg bg-black text-white">Criar</button>
+          </form>
+        </Modal>
+      </div>
+    </>
   )
 }
