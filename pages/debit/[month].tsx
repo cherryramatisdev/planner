@@ -1,4 +1,5 @@
 import { useRouter } from "next/router"
+import { Debit } from "@prisma/client";
 import { FormEvent, useState } from "react"
 import CurrencyInput from "react-currency-input-field"
 import { GrAdd } from "react-icons/gr"
@@ -7,15 +8,7 @@ import { NavBar } from "../../components/navbar"
 import { currencyFormat } from "../../utils/currencyFormat"
 import { groupBy } from "../../utils/groupBy"
 import { trpc } from "../../utils/trpc"
-
-type Debit = {
-  id: number,
-  title: string,
-  price: number,
-  paid: boolean,
-  payerName: string,
-  monthId: number
-}
+import { MdDeleteForever } from "react-icons/md";
 
 export default function DebitPage() {
   const [open, setOpen] = useState(false)
@@ -29,9 +22,18 @@ export default function DebitPage() {
   const month = trpc.getMonthDebits.useQuery({ id: Number(monthId) })
   const updatePaid = trpc.updateDebitPaid.useMutation()
   const createDebit = trpc.createDebit.useMutation()
+  const deleteDebit = trpc.deleteDebit.useMutation()
 
   const togglePaid = async (id: number, paid: boolean) => {
     const debit = await updatePaid.mutateAsync({ id, paid })
+
+    if (debit) {
+      ctx.getMonthDebits.invalidate()
+    }
+  }
+
+  const removeDebit = async (id: number) => {
+    const debit = await deleteDebit.mutateAsync({ id })
 
     if (debit) {
       ctx.getMonthDebits.invalidate()
@@ -67,16 +69,22 @@ export default function DebitPage() {
     <>
       <NavBar title={`Lista de debitos para o mes - ${month.data.name}`} />
 
-      <div className="p-10 container grid grid-cols-4 gap-10 overflow-y-auto">
+      <div className="p-10 container grid grid-cols-3 gap-10 overflow-y-auto">
         {payersName.map((payer) => (
           <div key={payer} className="mt-10">
             <p className="text-white">Debitos a serem pagos por {payer}: </p>
 
             {groupedByPayer[payer].map((debit: Debit) => (
-              <button key={debit.id} onClick={() => togglePaid(debit.id, debit.paid)} className={`w-full flex items-center justify-between bg-white text-black p-2 mb-2 ${debit.paid && 'opacity-30'}`}>
-                <p>{debit.title} - {currencyFormat(debit.price)}</p>
-                <p className={`${debit.paid ? 'text-red-500' : 'text-white'} ml-2 font-bold`}>PG</p>
-              </button>
+              <div key={debit.id} className="w-full flex flex-row items-center justify-center gap-3">
+                <button onClick={() => togglePaid(debit.id, debit.paid)} className={`w-full flex items-center justify-between bg-white text-black p-2 mb-2 ${debit.paid && 'opacity-30'}`}>
+                  <p>{debit.title} - {currencyFormat(debit.price)}</p>
+                  <p className={`${debit.paid ? 'text-red-500' : 'text-white'} ml-2 font-bold`}>PG</p>
+                </button>
+
+                <button onClick={() => removeDebit(debit.id)}>
+                  <MdDeleteForever color="red" size={30} />
+                </button>
+              </div>
             ))}
           </div>
         ))}

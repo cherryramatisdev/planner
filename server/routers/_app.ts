@@ -40,6 +40,13 @@ export const appRouter = router({
 
       return month
     }),
+  deleteMonth: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async (req) => {
+      const month = await prisma.month.delete({ where: { id: req.input.id }})
+
+      return month
+    }),
   getMonthDebits: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async (req) => {
@@ -67,6 +74,17 @@ export const appRouter = router({
           price: req.input.price,
           paid: false,
           monthId: req.input.monthId
+        }
+      })
+
+      return debit
+    }),
+  deleteDebit: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async (req) => {
+      const debit = await prisma.debit.delete({
+        where: {
+          id: req.input.id,
         }
       })
 

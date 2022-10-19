@@ -6,6 +6,7 @@ import { GrAdd } from 'react-icons/gr'
 
 import { trpc } from '../utils/trpc'
 import { NavBar } from '../components/navbar'
+import { MdDeleteForever } from 'react-icons/md'
 
 const Home: NextPage = () => {
   const [name, setName] = useState('')
@@ -13,6 +14,7 @@ const Home: NextPage = () => {
   const ctx = trpc.useContext()
   const months = trpc.listMonths.useQuery()
   const createMonth = trpc.createMonth.useMutation()
+  const deleteMonth = trpc.deleteMonth.useMutation()
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -26,14 +28,28 @@ const Home: NextPage = () => {
     }
   }
 
+  const removeMonth = async (id: number) => {
+    const month = await deleteMonth.mutateAsync({ id })
+
+    if (month) {
+      ctx.listMonths.invalidate()
+    }
+  }
+
   if (!months.data) return <div>Loading...</div>
 
   return (
-    <div className="relative p-10 w-screen h-screen flex flex-col items-center justify-start gap-5">
-      <NavBar title="Pagina inicial - Selecione ou crie um mes"/>
+    <div className="relative p-10 w-screen h-screen flex flex-col items-center justify-start">
+      <NavBar title="Pagina inicial - Selecione ou crie um mes" />
 
       {months.data.map(data => (
-        <Month key={data.id} title={data.name} totals={data.total} href={`/debit/${data.id}`} />
+        <div key={data.id} className="mt-10 w-full flex flex-row items-center justify-center gap-3">
+          <Month key={data.id} title={data.name} totals={data.total} href={`/debit/${data.id}`} />
+
+          <button onClick={() => removeMonth(data.id)}>
+            <MdDeleteForever color="red" size={30} />
+          </button>
+        </div>
       ))}
 
       <Modal open={open} onClose={() => setOpen(false)}>
